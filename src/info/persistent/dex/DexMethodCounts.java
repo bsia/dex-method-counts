@@ -18,18 +18,21 @@ import com.android.dexdeps.ClassRef;
 import com.android.dexdeps.DexData;
 import com.android.dexdeps.MethodRef;
 import com.android.dexdeps.Output;
+import com.github.spyhunter99.model.CountData;
+import com.github.spyhunter99.model.Node;
 
 import java.util.*;
 
 public class DexMethodCounts extends DexCount {
 
-    DexMethodCounts(OutputStyle outputStyle) {
-        super(outputStyle);
+    DexMethodCounts() {
+        super();
     }
 
     @Override
-    public void generate(DexData dexData, boolean includeClasses, String packageFilter, int maxDepth, Filter filter) {
+    public CountData generate(DexData dexData, boolean includeClasses, String packageFilter, int maxDepth, Filter filter) {
         MethodRef[] methodRefs = getMethodRefs(dexData, filter);
+        CountData ret = new CountData();
 
         for (MethodRef methodRef : methodRefs) {
             String classDescriptor = methodRef.getDeclClassName();
@@ -40,12 +43,17 @@ public class DexMethodCounts extends DexCount {
                     !packageName.startsWith(packageFilter)) {
                 continue;
             }
-            overallCount++;
-            if (outputStyle == OutputStyle.TREE) {
+            ret.overallMetrics.methodCount++;
+
+            //if (outputStyle == OutputStyle.TREE)
+            {
                 String packageNamePieces[] = packageName.split("\\.");
-                Node packageNode = packageTree;
+                Node packageNode = ret.packageTree;
+                if (packageNode==null)
+                    packageNode= ret.packageTree = new Node();
+
                 for (int i = 0; i < packageNamePieces.length && i < maxDepth; i++) {
-                    packageNode.count++;
+                    packageNode.count.methodCount++;
                     String name = packageNamePieces[i];
                     if (packageNode.children.containsKey(name)) {
                         packageNode = packageNode.children.get(name);
@@ -54,40 +62,41 @@ public class DexMethodCounts extends DexCount {
                         if (name.length() == 0) {
                             // This method is declared in a class that is part of the default package.
                             // Typical examples are methods that operate on arrays of primitive data types.
-                            name = "<default>";
+                            name = "(default)";
                         }
                         packageNode.children.put(name, childPackageNode);
                         packageNode = childPackageNode;
                     }
                 }
-                packageNode.count++;
-            } else if (outputStyle == OutputStyle.FLAT) {
+                packageNode.count.methodCount++;
+            } /*else if (outputStyle == OutputStyle.FLAT) {
                 IntHolder count = packageCount.get(packageName);
                 if (count == null) {
                     count = new IntHolder();
                     packageCount.put(packageName, count);
                 }
                 count.value++;
-            }
+            }*/
         }
+        return ret;
     }
 
     private static MethodRef[] getMethodRefs(DexData dexData, Filter filter) {
         MethodRef[] methodRefs = dexData.getMethodRefs();
-        out.println("Read in " + methodRefs.length + " method IDs from " + dexData.getDexFileName() + ".");
+       // out.println("Read in " + methodRefs.length + " method IDs from " + dexData.getDexFileName() + ".");
         if (filter == Filter.ALL) {
             return methodRefs;
         }
 
         ClassRef[] externalClassRefs = dexData.getExternalReferences();
-        out.println("Read in " + externalClassRefs.length +
-                " external class references.");
+        //out.println("Read in " + externalClassRefs.length +
+          //      " external class references.");
         Set<MethodRef> externalMethodRefs = new HashSet<MethodRef>();
         for (ClassRef classRef : externalClassRefs) {
             Collections.addAll(externalMethodRefs, classRef.getMethodArray());
         }
-        out.println("Read in " + externalMethodRefs.size() +
-                " external method references.");
+        //out.println("Read in " + externalMethodRefs.size() +
+          //      " external method references.");
         List<MethodRef> filteredMethodRefs = new ArrayList<MethodRef>();
         for (MethodRef methodRef : methodRefs) {
             boolean isExternal = externalMethodRefs.contains(methodRef);
@@ -96,9 +105,9 @@ public class DexMethodCounts extends DexCount {
                 filteredMethodRefs.add(methodRef);
             }
         }
-        out.println("Filtered to " + filteredMethodRefs.size() + " " +
-                (filter == Filter.DEFINED_ONLY ? "defined" : "referenced") +
-                " method IDs.");
+        //out.println("Filtered to " + filteredMethodRefs.size() + " " +
+          //      (filter == Filter.DEFINED_ONLY ? "defined" : "referenced") +
+            //    " method IDs.");
         return filteredMethodRefs.toArray(
                 new MethodRef[filteredMethodRefs.size()]);
     }

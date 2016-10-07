@@ -16,6 +16,11 @@ package info.persistent.dex;
 
 import com.android.dexdeps.DexData;
 import com.android.dexdeps.DexDataException;
+import com.github.spyhunter99.DynamicLoader;
+import com.github.spyhunter99.model.CountData;
+import com.github.spyhunter99.model.Metric;
+import com.github.spyhunter99.model.Node;
+import com.github.spyhunter99.writers.FormattedText;
 
 import java.io.*;
 import java.util.*;
@@ -24,12 +29,11 @@ import java.util.zip.ZipException;
 import java.util.zip.ZipFile;
 
 public class Main {
-    private boolean countFields;
+
     private boolean includeClasses;
     private String packageFilter;
     private int maxDepth = Integer.MAX_VALUE;
     private DexMethodCounts.Filter filter = DexMethodCounts.Filter.ALL;
-    private DexMethodCounts.OutputStyle outputStyle = DexMethodCounts.OutputStyle.TREE;
 
     public static void main(String[] args) {
         Main main = new Main();
@@ -40,27 +44,46 @@ public class Main {
         try {
             String[] inputFileNames = parseArgs(args);
             int overallCount = 0;
+            List<CountData> data =new ArrayList<CountData>();
             for (String fileName : collectFileNames(inputFileNames)) {
                 System.out.println("Processing " + fileName);
-                DexCount counts;
-                if (countFields) {
-                    counts = new DexFieldCounts(outputStyle);
-                } else {
-                    counts = new DexMethodCounts(outputStyle);
-                }
+                DexCount fields= new DexFieldCounts();
+                DexCount methods = new DexMethodCounts();
+
                 Map<String, RandomAccessFile> dexFiles = openInputFiles(fileName);
 
                 for (String dexFilenName : dexFiles.keySet()) {
                     RandomAccessFile dexFile = dexFiles.get(dexFilenName);
                     DexData dexData = new DexData(dexFilenName, dexFile);
-                    dexData.load();
-                    counts.generate(dexData, includeClasses, packageFilter, maxDepth, filter);
-                    dexFile.close();
+                    try {
+                        dexData.load();
+                        CountData generate = fields.generate(dexData, includeClasses, packageFilter, maxDepth, filter);
+
+                        CountData generate1 = methods.generate(dexData, includeClasses, packageFilter, maxDepth, filter);
+                        generate.fileName=fileName;
+                        generate1.fileName=fileName;
+                        data.add(generate);
+                        data.add(generate1);
+                        dexFile.close();
+                        continue;
+                    } catch (DexDataException d){
+                        //not a dex'd file, plan b;
+                    }
+                    try {
+                        data.add(DynamicLoader.getClasses(new File(fileName)));
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+
                 }
-                counts.output();
-                overallCount = counts.getOverallCount();
             }
-            System.out.println(String.format("Overall %s count: %d", countFields ? "field" : "method", overallCount));
+
+            //then output the data
+
+            processOutput(data);
+
+
+
         } catch (UsageException ue) {
             usage();
             System.exit(2);
@@ -69,11 +92,15 @@ public class Main {
                 System.err.println("Failed: " + ioe);
             }
             System.exit(1);
-        } catch (DexDataException dde) {
-            /* a message was already reported, just bail quietly */
-            System.exit(1);
         }
     }
+
+    private void processOutput(List<CountData> data) {
+        System.out.println(FormattedText.getReport(data));
+
+    }
+
+
 
     /**
      * Opens an input file, which could be a .dex or a .jar/.apk with a
@@ -161,7 +188,7 @@ public class Main {
             if (arg.equals("--") || !arg.startsWith("--")) {
                 break;
             } else if (arg.equals("--count-fields")) {
-                countFields = true;
+
             } else if (arg.equals("--include-classes")) {
                 includeClasses = true;
             } else if (arg.startsWith("--package-filter=")) {
@@ -174,9 +201,7 @@ public class Main {
                     DexMethodCounts.Filter.class,
                     arg.substring(arg.indexOf('=') + 1).toUpperCase());
             } else if (arg.startsWith("--output-style")) {
-                outputStyle = Enum.valueOf(
-                    DexMethodCounts.OutputStyle.class,
-                    arg.substring(arg.indexOf('=') + 1).toUpperCase());
+
             } else {
                 System.err.println("Unknown option '" + arg + "'");
                 throw new UsageException();

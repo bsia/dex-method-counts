@@ -51,7 +51,7 @@ public class DexData {
      * @throws IOException if we encounter a problem while reading
      * @throws DexDataException if the DEX contents look bad
      */
-    public void load() throws IOException {
+    public void load() throws IOException, DexDataException {
         parseHeaderItem();
 
         loadStrings();
@@ -79,7 +79,7 @@ public class DexData {
     /**
      * Parses the interesting bits out of the header.
      */
-    void parseHeaderItem() throws IOException {
+    void parseHeaderItem() throws IOException, DexDataException {
         mHeaderItem = new HeaderItem();
 
         seek(0);
@@ -87,9 +87,9 @@ public class DexData {
         byte[] magic = new byte[8];
         readBytes(magic);
         if (!verifyMagic(magic)) {
-            System.err.println("Magic number is wrong -- are you sure " +
-                "this is a DEX file?");
-            throw new DexDataException();
+
+            throw new DexDataException("Magic number is wrong -- are you sure " +
+                    "this is a DEX file?");
         }
 
         /*
@@ -104,9 +104,9 @@ public class DexData {
             /* file is big-endian (!), reverse future reads */
             isBigEndian = true;
         } else {
-            System.err.println("Endian constant has unexpected value " +
-                Integer.toHexString(mHeaderItem.endianTag));
-            throw new DexDataException();
+
+            throw new DexDataException("Endian constant has unexpected value " +
+                    Integer.toHexString(mHeaderItem.endianTag));
         }
 
         seek(8+4+20);  // magic, checksum, signature

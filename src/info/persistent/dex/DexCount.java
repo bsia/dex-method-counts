@@ -15,6 +15,7 @@
 package info.persistent.dex;
 
 import com.android.dexdeps.DexData;
+import com.github.spyhunter99.model.CountData;
 
 import java.io.PrintStream;
 import java.util.Map;
@@ -23,26 +24,13 @@ import java.util.TreeMap;
 
 public abstract class DexCount {
 
-    static final PrintStream out = System.out;
-    final OutputStyle outputStyle;
-    final Node packageTree;
-    final Map<String, IntHolder> packageCount;
-    int overallCount = 0;
 
-    DexCount(OutputStyle outputStyle) {
-        this.outputStyle = outputStyle;
-        packageTree = this.outputStyle == OutputStyle.TREE ? new Node() : null;
-        packageCount = this.outputStyle == OutputStyle.FLAT
-                ? new TreeMap<String, IntHolder>() : null;
+    DexCount() {
     }
 
-    public abstract void generate(
+    public abstract CountData generate(
             DexData dexData, boolean includeClasses, String packageFilter, int maxDepth, Filter filter);
 
-    class IntHolder {
-
-        int value;
-    }
 
     enum Filter {
         ALL,
@@ -50,53 +38,6 @@ public abstract class DexCount {
         REFERENCED_ONLY
     }
 
-    enum OutputStyle {
-        TREE {
-            @Override
-            void output(DexCount counts) {
-                counts.packageTree.output("");
-            }
-        },
-        FLAT {
-            @Override
-            void output(DexCount counts) {
-                for (Map.Entry<String, IntHolder> e : counts.packageCount.entrySet()) {
-                    String packageName = e.getKey();
-                    if (packageName == "") {
-                        packageName = "<no package>";
-                    }
-                    System.out.printf("%6s %s\n", e.getValue().value, packageName);
-                }
-            }
-        };
 
-        abstract void output(DexCount counts);
-    }
-
-    void output() {
-        outputStyle.output(this);
-    }
-
-    int getOverallCount() {
-        return overallCount;
-    }
-
-    static class Node {
-
-        int count = 0;
-        NavigableMap<String, Node> children = new TreeMap<String, Node>();
-
-        void output(String indent) {
-            if (indent.length() == 0) {
-                out.println("<root>: " + count);
-            }
-            indent += "    ";
-            for (String name : children.navigableKeySet()) {
-                Node child = children.get(name);
-                out.println(indent + name + ": " + child.count);
-                child.output(indent);
-            }
-        }
-    }
 
 }

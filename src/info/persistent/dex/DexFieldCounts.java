@@ -14,18 +14,29 @@
 
 package info.persistent.dex;
 
-import com.android.dexdeps.*;
+import com.android.dexdeps.ClassRef;
+import com.android.dexdeps.DexData;
+import com.android.dexdeps.FieldRef;
+import com.android.dexdeps.Output;
+import com.github.spyhunter99.model.CountData;
+import com.github.spyhunter99.model.Node;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 public class DexFieldCounts extends DexCount {
 
-    DexFieldCounts(OutputStyle outputStyle) {
-        super(outputStyle);
+    DexFieldCounts() {
+        super();
     }
 
     @Override
-    public void generate(DexData dexData, boolean includeClasses, String packageFilter, int maxDepth, Filter filter) {
+    public CountData generate(DexData dexData, boolean includeClasses, String packageFilter, int maxDepth, Filter filter) {
+        CountData ret = new CountData();
+
         FieldRef[] fieldRefs = getFieldRefs(dexData, filter);
 
         for (FieldRef fieldRef : fieldRefs) {
@@ -37,12 +48,16 @@ public class DexFieldCounts extends DexCount {
                     !packageName.startsWith(packageFilter)) {
                 continue;
             }
-            overallCount++;
-            if (outputStyle == OutputStyle.TREE) {
+            ret.overallMetrics.fieldCount++;
+
+            //process tree data
+            {
                 String packageNamePieces[] = packageName.split("\\.");
-                Node packageNode = packageTree;
+                Node packageNode = new Node();
+                if (packageNode==null)
+                    packageNode= ret.packageTree = new Node();
                 for (int i = 0; i < packageNamePieces.length && i < maxDepth; i++) {
-                    packageNode.count++;
+                    packageNode.count.fieldCount++;
                     String name = packageNamePieces[i];
                     if (packageNode.children.containsKey(name)) {
                         packageNode = packageNode.children.get(name);
@@ -50,38 +65,34 @@ public class DexFieldCounts extends DexCount {
                         Node childPackageNode = new Node();
                         if (name.length() == 0) {
                             // This field is declared in a class that is part of the default package.
-                            name = "<default>";
+                            name = "(default)";
                         }
                         packageNode.children.put(name, childPackageNode);
                         packageNode = childPackageNode;
                     }
                 }
-                packageNode.count++;
-            } else if (outputStyle == OutputStyle.FLAT) {
-                IntHolder count = packageCount.get(packageName);
-                if (count == null) {
-                    count = new IntHolder();
-                    packageCount.put(packageName, count);
-                }
-                count.value++;
+                packageNode.count.fieldCount++;
+                ret.packageTree = packageNode;
             }
+
         }
+        return ret;
     }
 
     private static FieldRef[] getFieldRefs(DexData dexData, Filter filter) {
         FieldRef[] fieldRefs = dexData.getFieldRefs();
-        out.println("Read in " + fieldRefs.length + " field IDs from " + dexData.getDexFileName() + ".");
+       // out.println("Read in " + fieldRefs.length + " field IDs from " + dexData.getDexFileName() + ".");
         if (filter == Filter.ALL) {
             return fieldRefs;
         }
 
         ClassRef[] externalClassRefs = dexData.getExternalReferences();
-        out.println("Read in " + externalClassRefs.length + " external class references.");
+        //out.println("Read in " + externalClassRefs.length + " external class references.");
         Set<FieldRef> externalFieldRefs = new HashSet<FieldRef>();
         for (ClassRef classRef : externalClassRefs) {
             Collections.addAll(externalFieldRefs, classRef.getFieldArray());
         }
-        out.println("Read in " + externalFieldRefs.size() + " external field references.");
+        //out.println("Read in " + externalFieldRefs.size() + " external field references.");
         List<FieldRef> filteredFieldRefs = new ArrayList<FieldRef>();
         for (FieldRef FieldRef : fieldRefs) {
             boolean isExternal = externalFieldRefs.contains(FieldRef);
@@ -90,8 +101,8 @@ public class DexFieldCounts extends DexCount {
                 filteredFieldRefs.add(FieldRef);
             }
         }
-        out.println("Filtered to " + filteredFieldRefs.size() + " " +
-                (filter == Filter.DEFINED_ONLY ? "defined" : "referenced") + " field IDs.");
+        //out.println("Filtered to " + filteredFieldRefs.size() + " " +
+          //      (filter == Filter.DEFINED_ONLY ? "defined" : "referenced") + " field IDs.");
         return filteredFieldRefs.toArray(new FieldRef[filteredFieldRefs.size()]);
     }
 
