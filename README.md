@@ -2,6 +2,11 @@
 
 Simple tool to output per-package method counts in an Android DEX executable grouped by package, to aid in getting under the 65,536 referenced method limit. More details are [in this blog post](http://blog.persistent.info/2014/05/per-package-method-counts-for-androids.html).
 
+It can also be used programmatically and is available from maven central
+
+`com.github.spyhunter99:dex-method-counts:2.0.1`
+
+
 To run it with Ant:
 
     $ ant jar
