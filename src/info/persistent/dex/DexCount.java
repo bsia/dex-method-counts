@@ -32,7 +32,7 @@ public abstract class DexCount {
             DexData dexData, boolean includeClasses, String packageFilter, int maxDepth, Filter filter);
 
 
-    enum Filter {
+    public enum Filter {
         ALL,
         DEFINED_ONLY,
         REFERENCED_ONLY

@@ -20,9 +20,12 @@ import com.github.spyhunter99.DynamicLoader;
 import com.github.spyhunter99.model.CountData;
 import com.github.spyhunter99.model.Metric;
 import com.github.spyhunter99.model.Node;
+import com.github.spyhunter99.writers.FormattedHtml;
 import com.github.spyhunter99.writers.FormattedText;
+import com.github.spyhunter99.writers.IWriter;
 
 import java.io.*;
+import java.nio.charset.Charset;
 import java.util.*;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipException;
@@ -34,20 +37,26 @@ public class Main {
     private String packageFilter;
     private int maxDepth = Integer.MAX_VALUE;
     private DexMethodCounts.Filter filter = DexMethodCounts.Filter.ALL;
+    private List<CountData> data =new ArrayList<CountData>();
+    private File outputDir = new File(".");
+    private boolean fileout=true;
+    private boolean stdout=true;
 
     public static void main(String[] args) {
         Main main = new Main();
         main.run(args);
     }
 
-    void run(String[] args) {
+    /**
+     * processes the input files for field and method counts
+     * @param args
+     */
+    public void run(String[] args) {
         try {
             String[] inputFileNames = parseArgs(args);
-            int overallCount = 0;
-            List<CountData> data =new ArrayList<CountData>();
+            data.clear();
             for (String fileName : collectFileNames(inputFileNames)) {
                 System.out.println("Processing " + fileName);
-                DexCount fields= new DexFieldCounts();
                 DexCount methods = new DexMethodCounts();
 
                 Map<String, RandomAccessFile> dexFiles = openInputFiles(fileName);
@@ -57,12 +66,8 @@ public class Main {
                     DexData dexData = new DexData(dexFilenName, dexFile);
                     try {
                         dexData.load();
-                        CountData generate = fields.generate(dexData, includeClasses, packageFilter, maxDepth, filter);
-
                         CountData generate1 = methods.generate(dexData, includeClasses, packageFilter, maxDepth, filter);
-                        generate.fileName=fileName;
                         generate1.fileName=fileName;
-                        data.add(generate);
                         data.add(generate1);
                         dexFile.close();
                         continue;
@@ -70,7 +75,7 @@ public class Main {
                         //not a dex'd file, plan b;
                     }
                     try {
-                        data.add(DynamicLoader.getClasses(new File(fileName)));
+                        data.add(DynamicLoader.getClasses(new File(fileName), includeClasses, packageFilter, maxDepth, filter));
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
@@ -95,9 +100,106 @@ public class Main {
         }
     }
 
-    private void processOutput(List<CountData> data) {
-        System.out.println(FormattedText.getReport(data));
 
+    public void enableStdOut(boolean value){
+        stdout=value;
+
+    }
+
+    public void enableFileOutput(boolean value){
+        fileout=value;
+    }
+
+
+    /**
+     * if set and text or html output is enabled, the output will end up this directory
+     * @param directory
+     */
+    public void setOutputDirectory(File directory){
+        outputDir=directory;
+    }
+
+
+    private void closeAndClear(List<OutputStream> outputStreams) {
+        for (int i=0; i < outputStreams.size(); i++){
+            try {
+                outputStreams.get(i).close();
+            } catch (Exception e) {
+            }
+        }
+        outputStreams.clear();
+
+    }
+
+    /**
+     * gets the results of the last analysis, useful for wiring in your own output mechanism
+     * @return
+     */
+    public List<CountData> getData(){
+        return data;
+    }
+
+    private void processOutput(List<CountData> data) {
+        FormattedText text = new FormattedText();
+        FormattedHtml html = new FormattedHtml();
+
+        //one report for all files processed
+        String report = text.getReport(data);
+        if (stdout)
+            System.out.println(report);
+        if (fileout){
+            try {
+                FileOutputStream fos = new FileOutputStream(outputDir.getAbsolutePath() + File.separator + "dex-count-report.txt");
+                fos.write(report.getBytes(Charset.defaultCharset()));
+                fos.close();
+            }catch (Exception ex){
+                ex.printStackTrace();
+            }
+        }
+
+        report=null;
+        report = html.getReport(data);
+        if (fileout){
+            try {
+                FileOutputStream fos = new FileOutputStream(outputDir.getAbsolutePath() + File.separator + "dex-count-report.html");
+                fos.write(report.getBytes(Charset.defaultCharset()));
+                fos.close();
+            }catch (Exception ex){
+                ex.printStackTrace();
+            }
+        }
+
+
+
+
+        if (data.size()>1)
+        //individual reports for each file processed
+        for (int i=0; i < data.size(); i++) {
+            report = text.getReport(data.get(i));
+            if (stdout)
+                System.out.println(report);
+            if (fileout){
+                try {
+                    FileOutputStream fos = new FileOutputStream(outputDir.getAbsolutePath() + File.separator + data.get(i).fileName + ".txt");
+                    fos.write(report.getBytes(Charset.defaultCharset()));
+                    fos.close();
+                }catch (Exception ex){
+                    ex.printStackTrace();
+                }
+            }
+
+            report=null;
+            report = html.getReport(data.get(i));
+            if (fileout){
+                try {
+                    FileOutputStream fos = new FileOutputStream(outputDir.getAbsolutePath() + File.separator + data.get(i).fileName + ".html");
+                    fos.write(report.getBytes(Charset.defaultCharset()));
+                    fos.close();
+                }catch (Exception ex){
+                    ex.printStackTrace();
+                }
+            }
+        }
     }
 
 
@@ -180,6 +282,7 @@ public class Main {
     }
 
     private String[] parseArgs(String[] args) {
+        //TODO replace with commons cli, because this is just silly
         int idx;
 
         for (idx = 0; idx < args.length; idx++) {

@@ -9,7 +9,7 @@ import java.util.Map;
 public class CountData {
     public String fileName;
     public Node packageTree;
-    public Map<String, Metric> packageCount = new HashMap<String, Metric>();
+    //public Map<String, Metric> packageCount = new HashMap<String, Metric>();
 
     public Metric overallMetrics = new Metric();
 
