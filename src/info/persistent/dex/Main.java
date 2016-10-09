@@ -44,14 +44,14 @@ public class Main {
 
     public static void main(String[] args) {
         Main main = new Main();
-        main.run(args);
+        System.exit(main.run(args));
     }
 
     /**
      * processes the input files for field and method counts
      * @param args
      */
-    public void run(String[] args) {
+    public int run(String[] args) {
         try {
             String[] inputFileNames = parseArgs(args);
             data.clear();
@@ -91,13 +91,14 @@ public class Main {
 
         } catch (UsageException ue) {
             usage();
-            System.exit(2);
+            return (2);
         } catch (IOException ioe) {
             if (ioe.getMessage() != null) {
                 System.err.println("Failed: " + ioe);
             }
-            System.exit(1);
+            return (1);
         }
+        return 0;
     }
 
 
@@ -290,8 +291,10 @@ public class Main {
 
             if (arg.equals("--") || !arg.startsWith("--")) {
                 break;
-            } else if (arg.equals("--count-fields")) {
-
+            } else if (arg.equals("--disableStdOut")) {
+                stdout=false;
+            } else if (arg.equals("--enableFileOut")) {
+                fileout=true;
             } else if (arg.equals("--include-classes")) {
                 includeClasses = true;
             } else if (arg.startsWith("--package-filter=")) {
@@ -326,7 +329,8 @@ public class Main {
             "DEX per-package/class method counts v1.5\n" +
             "Usage: dex-method-counts [options] <file.{dex,apk,jar,directory}> ...\n" +
             "Options:\n" +
-            "  --count-fields\n" +
+            "  --disableStdOut\n" +
+            "  --enableFileOut\n" +
             "  --include-classes\n" +
             "  --package-filter=com.foo.bar\n" +
             "  --max-depth=N\n" +
