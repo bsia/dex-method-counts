@@ -54,5 +54,7 @@ project.version =
 
 apply from: 'https://raw.githubusercontent.com/chrisdoyle/gradle-fury/master/gradle/maven-support.gradle'
 //optional if you want to store your password encrypted
-//apply from: 'https://raw.githubusercontent.com/chrisdoyle/gradle-fury/master/gradle/encryption.gradle'
+apply from: 'https://raw.githubusercontent.com/chrisdoyle/gradle-fury/master/gradle/encryption.gradle'
+apply from: 'https://raw.githubusercontent.com/chrisdoyle/gradle-fury/master/gradle/quality.gradle'
+apply from: 'https://raw.githubusercontent.com/chrisdoyle/gradle-fury/master/gradle/site.gradle'
 
