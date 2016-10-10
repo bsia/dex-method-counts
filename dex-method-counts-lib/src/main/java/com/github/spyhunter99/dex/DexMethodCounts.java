@@ -12,15 +12,15 @@
  * limitations under the License.
  */
 
-package info.persistent.dex;
+package com.github.spyhunter99.dex;
 
 import com.android.dexdeps.ClassRef;
 import com.android.dexdeps.DexData;
 import com.android.dexdeps.FieldRef;
 import com.android.dexdeps.MethodRef;
 import com.android.dexdeps.Output;
-import com.github.spyhunter99.model.CountData;
-import com.github.spyhunter99.model.Node;
+import com.github.spyhunter99.dex.model.CountData;
+import com.github.spyhunter99.dex.model.Node;
 
 import java.util.ArrayList;
 import java.util.Collections;

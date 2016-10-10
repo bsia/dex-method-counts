@@ -1,8 +1,8 @@
-package com.github.spyhunter99.writers;
+package com.github.spyhunter99.dex.writers;
 
-import com.github.spyhunter99.model.CountData;
-import com.github.spyhunter99.model.Metric;
-import com.github.spyhunter99.model.Node;
+import com.github.spyhunter99.dex.model.CountData;
+import com.github.spyhunter99.dex.model.Metric;
+import com.github.spyhunter99.dex.model.Node;
 
 import java.util.Iterator;
 import java.util.List;

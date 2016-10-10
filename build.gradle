@@ -4,57 +4,40 @@ buildscript {
         mavenCentral()
         mavenLocal()
     }
-}
-repositories {
-    jcenter()
-    mavenCentral()
-    mavenLocal()
+
 }
 
-apply plugin: 'application'
+allprojects  {
+    // NOTE: project.group and project.version must be defined before including
+    // maven-support.gradle since it uses these values...
+    project.group = ( project.hasProperty('pom.groupId')
+            ? project.property('pom.groupId') : "" )
 
-mainClassName = "info.persistent.dex.Main"
+    project.version =
+            ( project.hasProperty('pom.version') ? project.property('pom.version') : "1.0" )
 
-// Match existing source structure
-sourceSets {
-    main {
-        java {
-            srcDir 'src'
+    //Use this for your project
+    apply from: 'https://raw.githubusercontent.com/chrisdoyle/gradle-fury/master/gradle/maven-support.gradle'
+
+    // forces all changing dependencies (i.e. SNAPSHOTs) to automagicially download
+    // (thanks, @BillBarnhill!)
+    configurations.all {
+        resolutionStrategy {
+            cacheChangingModulesFor 0, 'seconds'
         }
     }
-}
 
-jar {
-    manifest {
-        attributes("Main-Class": mainClassName)
+    repositories {
+        jcenter()
+        mavenCentral()
+        mavenLocal()
     }
-}
 
-
-task postTask() << {
-    description "Redirect output to match launcher script"
-    new File('build/jar/').mkdirs()
-    copy {
-        from 'build/libs/'
-        into 'build/jar/'
-        rename { filename ->
-            filename.replace("-"+project.property('pom.version'), "")
-        }
+    tasks.withType(JavaCompile) {
+        options.encoding = "UTF-8"
     }
+
+
 }
 
-assemble.finalizedBy postTask
-
-
-project.group = ( project.hasProperty('pom.groupId')
-        ? project.property('pom.groupId') : "" )
-
-project.version =
-        ( project.hasProperty('pom.version') ? project.property('pom.version') : "1.0" )
-
-apply from: 'https://raw.githubusercontent.com/chrisdoyle/gradle-fury/master/gradle/maven-support.gradle'
-//optional if you want to store your password encrypted
-apply from: 'https://raw.githubusercontent.com/chrisdoyle/gradle-fury/master/gradle/encryption.gradle'
-apply from: 'https://raw.githubusercontent.com/chrisdoyle/gradle-fury/master/gradle/quality.gradle'
-apply from: 'https://raw.githubusercontent.com/chrisdoyle/gradle-fury/master/gradle/site.gradle'
 

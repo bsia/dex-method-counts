@@ -105,7 +105,7 @@ then
 else
     curdir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 fi
-libdir="$curdir/build/jar"
+libdir="$curdir/dex-method-counts/build/jar"
 jarfile="dex-method-counts.jar"
 if [ ! -r "$libdir/$jarfile" ]
 then

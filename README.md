@@ -5,8 +5,8 @@ Simple tool to output per-package method counts in an Android DEX executable gro
 It can also be used programmatically and is available from maven central
 
 groupId `com.github.spyhunter99`
-artifactId `dex-method-counts`
-version `2.0.1`
+artifactId `dex-method-counts-lib`
+version `2.1`
 type `jar`
 
 # Deltas from original source https://github.com/mihaip/dex-method-counts
@@ -77,7 +77,7 @@ Use cases:
 Example
 
 ````
-    info.persistent.dex.Main dexcount = new info.persistent.dex.Main();
+   com.github.spyhunter99.dex.Main dexcount = new com.github.spyhunter99.dex.Main();
     dexcount.setOutputDirectory(new File("."));
     dexcount.enableStdOut(false);
     dexcount.enableFileOutput(true);

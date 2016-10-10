@@ -1,7 +1,4 @@
-package com.github.spyhunter99.model;
-
-import java.util.HashMap;
-import java.util.Map;
+package com.github.spyhunter99.dex.model;
 
 /**
  * Created by alex on 10/6/16.

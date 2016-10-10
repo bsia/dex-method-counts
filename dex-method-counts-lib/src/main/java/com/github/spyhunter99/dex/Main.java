@@ -12,17 +12,13 @@
  * limitations under the License.
  */
 
-package info.persistent.dex;
+package com.github.spyhunter99.dex;
 
 import com.android.dexdeps.DexData;
 import com.android.dexdeps.DexDataException;
-import com.github.spyhunter99.DynamicLoader;
-import com.github.spyhunter99.model.CountData;
-import com.github.spyhunter99.model.Metric;
-import com.github.spyhunter99.model.Node;
-import com.github.spyhunter99.writers.FormattedHtml;
-import com.github.spyhunter99.writers.FormattedText;
-import com.github.spyhunter99.writers.IWriter;
+import com.github.spyhunter99.dex.model.CountData;
+import com.github.spyhunter99.dex.writers.FormattedHtml;
+import com.github.spyhunter99.dex.writers.FormattedText;
 
 import java.io.*;
 import java.nio.charset.Charset;
@@ -31,6 +27,9 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipException;
 import java.util.zip.ZipFile;
 
+/**
+ * this is a fork of https://github.com/mihaip/dex-method-counts
+ */
 public class Main {
 
     private boolean includeClasses;
@@ -144,44 +143,14 @@ public class Main {
         FormattedText text = new FormattedText();
         FormattedHtml html = new FormattedHtml();
 
-        //one report for all files processed
-        String report = text.getReport(data);
-        if (stdout)
-            System.out.println(report);
-        if (fileout){
-            try {
-                FileOutputStream fos = new FileOutputStream(outputDir.getAbsolutePath() + File.separator + "dex-count-report.txt");
-                fos.write(report.getBytes(Charset.defaultCharset()));
-                fos.close();
-            }catch (Exception ex){
-                ex.printStackTrace();
-            }
-        }
-
-        report=null;
-        report = html.getReport(data);
-        if (fileout){
-            try {
-                FileOutputStream fos = new FileOutputStream(outputDir.getAbsolutePath() + File.separator + "dex-count-report.html");
-                fos.write(report.getBytes(Charset.defaultCharset()));
-                fos.close();
-            }catch (Exception ex){
-                ex.printStackTrace();
-            }
-        }
-
-
-
-
-        if (data.size()>1)
-        //individual reports for each file processed
-        for (int i=0; i < data.size(); i++) {
-            report = text.getReport(data.get(i));
+        if (data.size()>1) {
+            //one report for all files processed
+            String report = text.getReport(data);
             if (stdout)
                 System.out.println(report);
             if (fileout){
                 try {
-                    FileOutputStream fos = new FileOutputStream(outputDir.getAbsolutePath() + File.separator + data.get(i).fileName + ".txt");
+                    FileOutputStream fos = new FileOutputStream(outputDir.getAbsolutePath() + File.separator + "dex-count-report.txt");
                     fos.write(report.getBytes(Charset.defaultCharset()));
                     fos.close();
                 }catch (Exception ex){
@@ -190,10 +159,63 @@ public class Main {
             }
 
             report=null;
-            report = html.getReport(data.get(i));
+            report = html.getReport(data);
             if (fileout){
                 try {
-                    FileOutputStream fos = new FileOutputStream(outputDir.getAbsolutePath() + File.separator + data.get(i).fileName + ".html");
+                    FileOutputStream fos = new FileOutputStream(outputDir.getAbsolutePath() + File.separator + "index.html");
+                    fos.write(report.getBytes(Charset.defaultCharset()));
+                    fos.close();
+                }catch (Exception ex){
+                    ex.printStackTrace();
+                }
+            }
+            //individual reports for each file processed
+            for (int i = 0; i < data.size(); i++) {
+                report = text.getReport(data.get(i));
+                if (stdout)
+                    System.out.println(report);
+                if (fileout) {
+                    try {
+                        FileOutputStream fos = new FileOutputStream(outputDir.getAbsolutePath() + File.separator + new File(data.get(i).fileName).getName() + ".txt");
+                        fos.write(report.getBytes(Charset.defaultCharset()));
+                        fos.close();
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                    }
+                }
+
+                report = null;
+                report = html.getReport(data.get(i));
+                if (fileout) {
+                    try {
+                        FileOutputStream fos = new FileOutputStream(outputDir.getAbsolutePath() + File.separator + new File(data.get(i).fileName).getName() + ".html");
+                        fos.write(report.getBytes(Charset.defaultCharset()));
+                        fos.close();
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                    }
+                }
+            }
+        } else {
+            //one report for all files processed
+            String report = text.getReport(data);
+            if (stdout)
+                System.out.println(report);
+            if (fileout){
+                try {
+                    FileOutputStream fos = new FileOutputStream(outputDir.getAbsolutePath() + File.separator + "dex-count-report.txt");
+                    fos.write(report.getBytes(Charset.defaultCharset()));
+                    fos.close();
+                }catch (Exception ex){
+                    ex.printStackTrace();
+                }
+            }
+
+            report=null;
+            report = html.getReport(data);
+            if (fileout){
+                try {
+                    FileOutputStream fos = new FileOutputStream(outputDir.getAbsolutePath() + File.separator + "dex-count-report.html");
                     fos.write(report.getBytes(Charset.defaultCharset()));
                     fos.close();
                 }catch (Exception ex){

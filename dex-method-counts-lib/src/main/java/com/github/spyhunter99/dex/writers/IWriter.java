@@ -1,6 +1,6 @@
-package com.github.spyhunter99.writers;
+package com.github.spyhunter99.dex.writers;
 
-import com.github.spyhunter99.model.CountData;
+import com.github.spyhunter99.dex.model.CountData;
 
 import java.util.List;
 

@@ -1,7 +1,7 @@
-package com.github.spyhunter99;
+package com.github.spyhunter99.dex;
 
-import com.github.spyhunter99.model.CountData;
-import com.github.spyhunter99.model.Node;
+import com.github.spyhunter99.dex.model.CountData;
+import com.github.spyhunter99.dex.model.Node;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -17,8 +17,6 @@ import java.util.List;
 import java.util.UUID;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
-
-import info.persistent.dex.DexCount;
 
 /**
  * Created by alex on 10/6/16.

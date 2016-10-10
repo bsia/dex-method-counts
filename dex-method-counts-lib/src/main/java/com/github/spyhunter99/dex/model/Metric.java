@@ -1,4 +1,4 @@
-package com.github.spyhunter99.model;
+package com.github.spyhunter99.dex.model;
 
 /**
  * Created by alex on 10/6/16.

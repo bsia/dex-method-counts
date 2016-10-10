@@ -1,0 +1,35 @@
+//this is here because gradle is generating invalid jar files when application is applied
+apply plugin: 'application'
+
+description 'Command-line tool to count per-package methods in Android .dex files'
+
+
+dependencies {
+    compile project(':dex-method-counts-lib')
+}
+
+mainClassName = "com.github.spyhunter99.dex.Main"
+
+jar {
+    manifest {
+        attributes("Main-Class": mainClassName)
+    }
+    from {
+        configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+}
+
+
+task postTask() << {
+    description "Redirect output to match launcher script"
+    new File('build/jar/').mkdirs()
+    copy {
+        from 'build/libs/'
+        into 'build/jar/'
+        rename { filename ->
+            filename.replace("-"+project.property('pom.version'), "")
+        }
+    }
+}
+
+assemble.finalizedBy postTask

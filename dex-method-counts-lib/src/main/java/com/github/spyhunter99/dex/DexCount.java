@@ -12,15 +12,10 @@
  * limitations under the License.
  */
 
-package info.persistent.dex;
+package com.github.spyhunter99.dex;
 
 import com.android.dexdeps.DexData;
-import com.github.spyhunter99.model.CountData;
-
-import java.io.PrintStream;
-import java.util.Map;
-import java.util.NavigableMap;
-import java.util.TreeMap;
+import com.github.spyhunter99.dex.model.CountData;
 
 public abstract class DexCount {
 

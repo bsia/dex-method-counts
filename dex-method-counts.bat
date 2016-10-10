@@ -1,1 +1,1 @@
-java -jar build\jar\dex-method-counts.jar %1
+java -jar dex-method-counts\build\jar\dex-method-counts.jar %1

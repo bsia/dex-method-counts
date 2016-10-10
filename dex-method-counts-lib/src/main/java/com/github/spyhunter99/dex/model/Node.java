@@ -1,6 +1,5 @@
-package com.github.spyhunter99.model;
+package com.github.spyhunter99.dex.model;
 
-import java.io.PrintWriter;
 import java.util.NavigableMap;
 import java.util.TreeMap;
 
