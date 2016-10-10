@@ -306,8 +306,6 @@ public class Main {
                 filter = Enum.valueOf(
                     DexMethodCounts.Filter.class,
                     arg.substring(arg.indexOf('=') + 1).toUpperCase());
-            } else if (arg.startsWith("--output-style")) {
-
             } else {
                 System.err.println("Unknown option '" + arg + "'");
                 throw new UsageException();
@@ -334,8 +332,7 @@ public class Main {
             "  --include-classes\n" +
             "  --package-filter=com.foo.bar\n" +
             "  --max-depth=N\n" +
-            "  --filter=ALL|DEFINED_ONLY|REFERENCED_ONLY\n" +
-            "  --output-style=FLAT|TREE\n"
+            "  --filter=ALL|DEFINED_ONLY|REFERENCED_ONLY\n"
         );
     }
 
