@@ -17,6 +17,7 @@ package com.github.spyhunter99.dex;
 import com.android.dexdeps.DexData;
 import com.android.dexdeps.DexDataException;
 import com.github.spyhunter99.dex.model.CountData;
+import com.github.spyhunter99.dex.model.Node;
 import com.github.spyhunter99.dex.writers.FormattedHtml;
 import com.github.spyhunter99.dex.writers.FormattedText;
 
@@ -67,7 +68,22 @@ public class Main {
                         dexData.load();
                         CountData generate1 = methods.generate(dexData, includeClasses, packageFilter, maxDepth, filter);
                         generate1.fileName=fileName;
-                        data.add(generate1);
+                        boolean merged=false;
+
+                        //https://github.com/spyhunter99/dex-method-counts/issues/3
+                        //search for existing report in the case of multidex setups
+                        for (int i=0; i < data.size(); i++){
+                            if (data.get(i).fileName.equals(generate1.fileName)){
+                                //merge the data
+                                data.get(i).isMultiDex=true;
+                                merge(data.get(i), generate1);
+                                merged=true;
+                                break;
+                            }
+                        }
+
+                        if (!merged)
+                            data.add(generate1);
                         dexFile.close();
                         continue;
                     } catch (DexDataException d){
@@ -75,7 +91,7 @@ public class Main {
                     }
                     try {
                         data.add(DynamicLoader.getClasses(new File(fileName), includeClasses, packageFilter, maxDepth, filter));
-                    } catch (Exception e) {
+                    } catch (Throwable e) {
                         e.printStackTrace();
                     }
 
@@ -98,6 +114,36 @@ public class Main {
             return (1);
         }
         return 0;
+    }
+
+    private void merge(CountData output, CountData newrecord) {
+        output.isMultiDex=true;
+        output.overallMetrics.fieldCount+=newrecord.overallMetrics.fieldCount;
+        output.overallMetrics.methodCount+=newrecord.overallMetrics.methodCount;
+        merge(output.packageTree, newrecord.packageTree);
+    }
+
+    private void merge(Node lhs, Node rhs) {
+        lhs.count.fieldCount+=rhs.count.fieldCount;
+        lhs.count.methodCount+=rhs.count.methodCount;
+        //foreach item in right, check to see if left has it
+            //if not, add it
+            //if yes, merge it
+            //then merge all children of the node
+
+        Iterator<Map.Entry<String, Node>> iterator = rhs.children.entrySet().iterator();
+        while (iterator.hasNext()){
+            Map.Entry<String, Node> next = iterator.next();
+            Node rightNode = next.getValue();
+            if (lhs.children.containsKey(next.getKey())){
+                Node leftNode = lhs.children.get(next.getKey());
+                merge (leftNode, rightNode);
+            } else {
+                //add to left node as is
+                lhs.children.put(next.getKey(), next.getValue());
+            }
+        }
+
     }
 
 

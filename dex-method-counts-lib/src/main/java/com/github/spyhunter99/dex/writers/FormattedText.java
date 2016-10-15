@@ -35,6 +35,14 @@ public class FormattedText implements IWriter{
                 Map.Entry<String, Node> next = iterator.next();
                 print (next.getValue(), next.getKey(), "",sb);
             }
+        sb.append("Processed ").
+                append(countData.fileName).
+                append("\nRead in ").
+                append(countData.overallMetrics.methodCount).
+                append(" method IDs and ").
+                append(countData.overallMetrics.fieldCount).
+                append(" field IDs\n");
+        sb.append("----------------------------------\n");
 
         return sb.toString();
     }
@@ -63,6 +71,7 @@ public class FormattedText implements IWriter{
                 Map.Entry<String, Node> next = iterator.next();
                 print (next.getValue(), next.getKey(), indent2,sb);
             }
+
 
         }
     }

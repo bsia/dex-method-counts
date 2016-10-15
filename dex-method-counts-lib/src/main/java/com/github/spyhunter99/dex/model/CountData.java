@@ -5,6 +5,7 @@ package com.github.spyhunter99.dex.model;
  */
 public class CountData {
     public String fileName;
+    public boolean isMultiDex=false;
     public Node packageTree;
     //public Map<String, Metric> packageCount = new HashMap<String, Metric>();
 

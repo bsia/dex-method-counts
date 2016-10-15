@@ -6,7 +6,7 @@ It can also be used programmatically and is available from maven central
 
 groupId `com.github.spyhunter99`
 artifactId `dex-method-counts-lib`
-version `2.1`
+version `2.1.1`
 type `jar`
 
 # Deltas from original source https://github.com/mihaip/dex-method-counts
@@ -16,6 +16,7 @@ type `jar`
 * HTML and formatted text file outputs (plus the existing standard out)
 * Field counts and method counts are included all the time
 * programmatic access to enable you to handle the output anyway you want
+* Multidex metrics aggregation
 
 # Run it from the command line
 
