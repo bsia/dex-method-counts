@@ -89,7 +89,7 @@ public class FormattedHtml implements IWriter {
                 "</td>\n" +
                 "</tr>\n" +
                 "<tr>\n" +
-                "<td class=\"text-align:right\">Designed for use with <a href=\"#\">dex-methods-count</a> plugin.</td>\n" +
+                "<td class=\"text-align:right\">Designed for use with <a href=\"https://github.com/spyhunter99/dex-method-counts\">dex-methods-count</a> plugin.</td>\n" +
                 "</tr>\n" +
                 "</table>\n" +
                 "<hr size=\"1\">\n" +
